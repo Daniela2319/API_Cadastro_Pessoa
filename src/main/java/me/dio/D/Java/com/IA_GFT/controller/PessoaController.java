@@ -2,6 +2,7 @@ package me.dio.D.Java.com.IA_GFT.controller;
 
 import me.dio.D.Java.com.IA_GFT.model.Pessoa;
 import me.dio.D.Java.com.IA_GFT.repository.PessoaRepository;
+import me.dio.D.Java.com.IA_GFT.service.PessoaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,47 +13,35 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/pessoas")
 public class PessoaController {
+
     @Autowired
-    private PessoaRepository pessoaRepository;
+    private PessoaService pessoaService;
+
     @GetMapping
-    public List<Pessoa> getAllPessoas () {
-        return pessoaRepository.findAll();
+    public List<Pessoa> getAllPessoas() {
+        return pessoaService.getAllPessoas();
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<Pessoa> getPessoaById(@PathVariable Long id){
-        Optional<Pessoa>pessoa = pessoaRepository.findById(id);
-        return pessoa.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<Pessoa> getPessoaById(@PathVariable Long id) {
+        Pessoa pessoa = pessoaService.getPessoaById(id);
+        return pessoa != null ? ResponseEntity.ok(pessoa) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
     public Pessoa createPessoa(@RequestBody Pessoa pessoa) {
-        return pessoaRepository.save(pessoa);
+        return pessoaService.createPessoa(pessoa);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Pessoa> updatePessoa(@PathVariable Long id, @RequestBody Pessoa pessoaDetails) {
-        Optional<Pessoa> pessoa = pessoaRepository.findById(id);
-        if (pessoa.isPresent()) {
-            Pessoa p = pessoa.get();
-            p.setNome(pessoaDetails.getNome());
-            p.setEmail(pessoaDetails.getEmail());
-            p.setEndereco(pessoaDetails.getEndereco());
-            p.setTelefone(pessoaDetails.getTelefone());
-            final Pessoa updatedPessoa = pessoaRepository.save(p);
-            return ResponseEntity.ok(updatedPessoa);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        Pessoa updatedPessoa = pessoaService.updatePessoa(id, pessoaDetails);
+        return updatedPessoa != null ? ResponseEntity.ok(updatedPessoa) : ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePessoa(@PathVariable Long id) {
-        Optional<Pessoa> pessoa = pessoaRepository.findById(id);
-        if (pessoa.isPresent()) {
-            pessoaRepository.delete(pessoa.get());
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        pessoaService.deletePessoa(id);
+        return ResponseEntity.noContent().build();
     }
 }
