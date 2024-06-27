@@ -1,0 +1,1 @@
+web: java -jar build/libs/D-Java-com-IA-GFT-0.0.1-SNAPSHOT.jar
